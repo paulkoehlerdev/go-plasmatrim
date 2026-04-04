@@ -187,7 +187,7 @@ func main() {
 			remoteAddr := conn.RemoteAddr().String()
 			localAddr := conn.LocalAddr().String()
 			slog.Info("connection", "addr", remoteAddr, "local", localAddr)
-			go websocketHub.emit("connection", remoteAddr, localAddr, ctx.User())
+			go websocketHub.emit("connection", remoteAddr, localAddr, "")
 			return conn
 		}
 
