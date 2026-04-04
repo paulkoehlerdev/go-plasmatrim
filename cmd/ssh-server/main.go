@@ -21,7 +21,6 @@ type SSHConnectionInfo struct {
 	EventType            string `json:"event_type"`
 	Timestamp            string `json:"timestamp"`
 	RemoteAddr           string `json:"remote_addr"`
-	LocalAddr            string `json:"local_addr"`
 	User                 string `json:"user,omitempty"`
 	Command              string `json:"command,omitempty"`
 	Password             string `json:"password,omitempty"`
@@ -105,12 +104,11 @@ func (h *websocketHub) broadcast(event SSHConnectionInfo) {
 	}
 }
 
-func (h *websocketHub) emit(eventType, remoteAddr, localAddr, user string) {
+func (h *websocketHub) emit(eventType, remoteAddr, user string) {
 	h.broadcast(SSHConnectionInfo{
 		EventType:  eventType,
 		Timestamp:  time.Now().UTC().Format(time.RFC3339Nano),
 		RemoteAddr: remoteAddr,
-		LocalAddr:  localAddr,
 		User:       user,
 	})
 }
@@ -140,7 +138,7 @@ func (h *websocketHub) emitPublicKeyInfo(addr, user string, key ssh.PublicKey) {
 		Timestamp:            time.Now().UTC().Format(time.RFC3339Nano),
 		RemoteAddr:           addr,
 		User:                 user,
-		PublicKeyFingerprint: xssh.FingerprintSHA256(key),
+		PublicKeyFingerprint:  xssh.FingerprintSHA256(key),
 		PublicKeyType:        key.Type(),
 	})
 }
@@ -185,9 +183,8 @@ func main() {
 	log.Fatal(ssh.ListenAndServe(addr, nil, func(server *ssh.Server) error {
 		server.ConnCallback = func(ctx ssh.Context, conn net.Conn) net.Conn {
 			remoteAddr := conn.RemoteAddr().String()
-			localAddr := conn.LocalAddr().String()
-			slog.Info("connection", "addr", remoteAddr, "local", localAddr)
-			go websocketHub.emit("connection", remoteAddr, localAddr, "")
+			slog.Info("connection", "addr", remoteAddr)
+			go websocketHub.emit("connection", remoteAddr, "")
 			return conn
 		}
 
