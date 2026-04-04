@@ -54,7 +54,7 @@ func main() {
 				"password", password,
 				"accepted", allow,
 			)
-			return false
+			return true
 		}
 
 		server.PublicKeyHandler = func(ctx ssh.Context, key ssh.PublicKey) bool {
@@ -64,7 +64,7 @@ func main() {
 				"fingerprint", xssh.FingerprintSHA256(key),
 				"type", key.Type(),
 			)
-			return false
+			return true
 		}
 
 		return nil
