@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"io"
 	"log"
 	"log/slog"
@@ -9,7 +10,14 @@ import (
 )
 
 func main() {
-	addr := ":2222"
+	var addr string
+	flag.StringVar(&addr, "addr", ":2222", "Address to listen on")
+	flag.Parse()
+
+	if addr == "" {
+		flag.Usage()
+		return
+	}
 
 	slog.Info("Starting SSH server", "addr", addr)
 
