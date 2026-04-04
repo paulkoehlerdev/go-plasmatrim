@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"log/slog"
+	"net"
 
 	"github.com/gliderlabs/ssh"
 )
@@ -26,5 +27,11 @@ func main() {
 		slog.Info("SSH session", "addr", s.RemoteAddr().String(), "user", s.User())
 	})
 
-	log.Fatal(ssh.ListenAndServe(addr, nil))
+	log.Fatal(ssh.ListenAndServe(addr, nil, func(server *ssh.Server) error {
+		server.ConnCallback = func(ctx ssh.Context, conn net.Conn) net.Conn {
+			slog.Info("connection", "addr", conn.RemoteAddr())
+			return conn
+		}
+		return nil
+	}))
 }
